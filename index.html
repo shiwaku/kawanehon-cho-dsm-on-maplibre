@@ -1,0 +1,211 @@
+<html>
+
+<head>
+    <title>VIRTUAL SHIZUOKA 川根本町 点群DSMとLOD1の比較</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
+    <link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet" />
+    <script src="https://unpkg.com/pmtiles@2.11.0/dist/index.js"></script>
+    <script type="module" src="maplibre-gl-gsi-terrain-fast-png.js"></script>
+    <script src="https://unpkg.com/@mapbox/mapbox-gl-sync-move@0.3.1"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
+        #map1,
+        #map2 {
+            height: 100%;
+            width: 100%;
+        }
+
+        .maps {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="maps">
+        <div id="map1"></div>
+        <div id="map2"></div>
+    </div>
+    <script>
+        // PMTilesプラグイン
+        const protocol = new pmtiles.Protocol();
+        maplibregl.addProtocol('pmtiles', protocol.tile);
+
+        // マップの初期化
+        const map1 = new maplibregl.Map({
+            container: 'map1',
+            style: 'std.json',
+            zoom: 18.56,
+            minZoom: 1,
+            maxZoom: 23,
+            pitch: 48,
+            bearing: -34.4,
+            maxPitch: 85,
+            center: [138.0816261, 35.0467647],
+            hash: true,
+            attributionControl: false,
+        })
+
+        // スケール表示
+        map1.addControl(new maplibregl.ScaleControl({
+            maxWidth: 200,
+            unit: 'metric'
+        }));
+
+        // Attributionを折りたたみ表示
+        map1.addControl(new maplibregl.AttributionControl({
+            compact: true,
+            customAttribution: '<a href="https://www.geospatial.jp/ckan/dataset/virtual-shizuoka-mw" target="_blank">VIRTUAL SHIZUOKA 静岡県 中・西部 点群データ</a>'
+        }));
+
+        // 3D地形コントロール表示
+        map1.addControl(
+            new maplibregl.TerrainControl({
+                source: 'aist-dem-terrain-rgb',
+                exaggeration: 1 // 標高を強調する倍率
+            })
+        );
+
+        map1.on('load', () => {
+            // 産総研 シームレス標高タイルソース
+            map1.addSource("aist-dem-terrain-rgb", {
+                type: 'raster-dem',
+                tiles: ["https://gbank.gsj.jp/seamless/elev/terrainRGB/land/{z}/{y}/{x}.png"],
+                attribution: '<a href="https://tiles.gsj.jp/tiles/elev/tiles.html#h_land" target="_blank">産総研 シームレス標高タイル(陸域統合DEM)</a>',
+                tileSize: 256
+            });
+
+            // 産総研 シームレス標高タイルセット
+            map1.setTerrain({ 'source': 'aist-dem-terrain-rgb', 'exaggeration': 1 });
+
+            // PLATEAU建築物（PMTiles）ソース
+            map1.addSource("plateau-pmtiles", {
+                type: "vector",
+                url: "pmtiles://https://shiworks.xsrv.jp/pmtiles-data/plateau/22429_kawanehon-cho_2023_bldg/Building.pmtiles",
+                minzoom: 4,
+                maxzoom: 16,
+                attribution: '<a href="https://www.geospatial.jp/ckan/dataset/plateau">3D都市モデルPLATEAU建築物モデル（国土交通省）</a>'
+            });
+
+            // PLATEAU建築物（PMTiles）レイヤ
+            map1.addLayer({
+                'id': 'plateau-pmtiles',
+                'source': 'plateau-pmtiles',
+                'source-layer': "Building",
+                "minzoom": 4,
+                "maxzoom": 23,
+                'type': 'fill-extrusion',
+                'paint': {
+                    "fill-extrusion-color": '#FFFFFF',
+                    "fill-extrusion-opacity": 0.8,
+                    "fill-extrusion-height": ["get", "measuredHeight"]
+                }
+            });
+
+        })
+
+        // マップの初期化
+        const map2 = new maplibregl.Map({
+            container: 'map2',
+            style: 'std.json',
+            zoom: 18.56,
+            minZoom: 1,
+            maxZoom: 23,
+            pitch: 48,
+            bearing: -34.4,
+            maxPitch: 85,
+            center: [138.0816261, 35.0467647],
+            hash: true,
+            attributionControl: false,
+        });
+
+        // ズーム・回転
+        map2.addControl(new maplibregl.NavigationControl());
+
+        // フルスクリーンモードのオンオフ
+        map2.addControl(new maplibregl.FullscreenControl());
+
+        // 現在位置表示
+        map2.addControl(new maplibregl.GeolocateControl({
+            positionOptions: {
+                enableHighAccuracy: false
+            },
+            fitBoundsOptions: { maxZoom: 18 },
+            trackUserLocation: true,
+            showUserLocation: true
+        }));
+
+        // スケール表示
+        map2.addControl(new maplibregl.ScaleControl({
+            maxWidth: 200,
+            unit: 'metric'
+        }));
+
+        // Attributionを折りたたみ表示
+        map2.addControl(new maplibregl.AttributionControl({
+            compact: true
+        }));
+
+        // 3D地形コントロール表示
+        map2.addControl(
+            new maplibregl.TerrainControl({
+                source: 'dsm',
+                exaggeration: 1 // 標高を強調する倍率
+            })
+        );
+
+        map2.on('load', () => {
+            // DSMソース
+            map2.addSource("dsm", {
+                type: 'raster-dem',
+                tiles: [
+                    'gsidem://https://shiworks.xsrv.jp/raster-tiles/pref-shizuoka/kawanehon-cho-sample-1/{z}/{x}/{y}.png',
+                ],
+                attribution: '<a href="https://www.geospatial.jp/ckan/dataset/virtual-shizuoka-mw" target="_blank">VIRTUAL SHIZUOKA 静岡県 中・西部 点群データ</a>',
+                tileSize: 256
+            });
+
+            // DSMセット
+            map2.setTerrain({ source: 'dsm', exaggeration: 1 });
+
+            // DSMラスターソース
+            map2.addSource("dsm-raster", {
+                type: 'raster',
+                tiles: [
+                    'https://shiworks.xsrv.jp/raster-tiles/pref-shizuoka/kawanehon-cho-sample-1/{z}/{x}/{y}.png',
+                ],
+                attribution: '<a href="https://www.geospatial.jp/ckan/dataset/virtual-shizuoka-mw" target="_blank">VIRTUAL SHIZUOKA 静岡県 中・西部 点群データ</a>',
+                tileSize: 256
+            });
+
+            // DSMラスターレイヤ
+            map2.addLayer({
+                'id': 'dsm-raster',
+                'type': 'raster',
+                'source': 'dsm-raster',
+                paint: {
+                    'raster-opacity': 0.8
+                }
+            });
+
+        });
+
+        syncMaps(map1, map2);
+
+    </script>
+</body>
+
+</html>
