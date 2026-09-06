@@ -94,7 +94,7 @@
             // PLATEAU建築物（PMTiles）ソース
             map1.addSource("plateau-pmtiles", {
                 type: "vector",
-                url: "pmtiles://https://shiworks.xsrv.jp/pmtiles-data/plateau/22429_kawanehon-cho_2023_bldg/Building.pmtiles",
+                url: "pmtiles://https://shi-works.com/pmtiles/plateau/22429_kawanehon-cho_2023_bldg/Building.pmtiles",
                 minzoom: 4,
                 maxzoom: 16,
                 attribution: '<a href="https://www.geospatial.jp/ckan/dataset/plateau">3D都市モデルPLATEAU建築物モデル（国土交通省）</a>'
@@ -172,7 +172,7 @@
             map2.addSource("dsm", {
                 type: 'raster-dem',
                 tiles: [
-                    'gsidem://https://shiworks.xsrv.jp/raster-tiles/pref-shizuoka/kawanehon-cho-sample-1/{z}/{x}/{y}.png',
+                    'gsidem://https://shi-works.com/raster-tiles/pref-shizuoka/kawanehon-cho-sample-1/{z}/{x}/{y}.png',
                 ],
                 attribution: '<a href="https://www.geospatial.jp/ckan/dataset/virtual-shizuoka-mw" target="_blank">VIRTUAL SHIZUOKA 静岡県 中・西部 点群データ</a>',
                 tileSize: 256
@@ -185,7 +185,7 @@
             map2.addSource("dsm-raster", {
                 type: 'raster',
                 tiles: [
-                    'https://shiworks.xsrv.jp/raster-tiles/pref-shizuoka/kawanehon-cho-sample-1/{z}/{x}/{y}.png',
+                    'https://shi-works.com/raster-tiles/pref-shizuoka/kawanehon-cho-sample-1/{z}/{x}/{y}.png',
                 ],
                 attribution: '<a href="https://www.geospatial.jp/ckan/dataset/virtual-shizuoka-mw" target="_blank">VIRTUAL SHIZUOKA 静岡県 中・西部 点群データ</a>',
                 tileSize: 256
